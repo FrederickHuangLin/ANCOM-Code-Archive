@@ -33,19 +33,99 @@ library(dplyr)
 ## Examples
 
 ### Standard analysis
+
 _Detection of differentially abundant genera between subjects_
+
 _Example dataset: moving-pics_
 
 ```r
 res = ANCOM(otu_data = otu_data, 
-meta_data = meta_data, 
-main_var = “Subject”,  
-zero_cut = 0.90, 
-p_adjust_method = “BH”, 
-alpha = 0.05, 
-adj_formula = NULL, 
-rand_formula = NULL)
+            meta_data = meta_data, 
+            main_var = “Subject”,  
+            zero_cut = 0.90, 
+            p_adjust_method = “BH”, 
+            alpha = 0.05, 
+            adj_formula = NULL, 
+            rand_formula = NULL)
 ```
+
+### Adjusted for covariates
+
+_Detection of differentially abundant genera between subjects adjusted for antibiotic usage_
+
+_Example dataset: moving-pics_
+
+```r
+res = ANCOM(otu_data = otu_data, 
+            meta_data = meta_data, 
+            main_var = “Subject”,  
+            zero_cut = 0.90, 
+            p_adjust_method = “BH”, 
+            alpha = 0.05, 
+            adj_formula = ”ReportedAntibioticUsage”,
+            rand_formula = NULL)
+```
+
+### Repeated measure/longitudinal analysis
+
+#### Random intercept model
+
+_Detection of differentially abundant genera between delivery methods accounting for random subject effect_
+
+_Each subject has his/her own intercept_
+
+_Example dataset: ecam_
+
+```r
+res = ANCOM(otu_data = otu_data, 
+            meta_data = meta_data, 
+            main_var = "delivery",  
+            zero_cut = 0.90, 
+            p_adjust_method = “BH”, 
+            alpha = 0.05, 
+            adj_formula = NULL,
+            rand_formula = "~ 1 | studyid")
+```
+
+#### Random intercept model adjusted for other covariates
+
+_Detection of differentially abundant genera between delivery methods accounting for fixed time effect and random subject effect_
+
+_Each subject has his/her own intercept_
+
+_Example dataset: ecam_
+
+```r
+res = ANCOM(otu_data = otu_data, 
+            meta_data = meta_data, 
+            main_var = "delivery",  
+            zero_cut = 0.90, 
+            p_adjust_method = “BH”, 
+            alpha = 0.05, 
+            adj_formula = ”month”,
+            rand_formula = "~ 1 | studyid")
+```
+
+#### Random coefficients/slope model
+
+_Detection of differentially abundant genera between delivery methods accounting for random time effect and random subject effect_
+
+_Each subject has his/her own intercept and slope_
+
+_Example dataset: ecam_
+
+```r
+res = ANCOM(otu_data = otu_data, 
+            meta_data = meta_data, 
+            main_var = "delivery",  
+            zero_cut = 0.90, 
+            p_adjust_method = “BH”, 
+            alpha = 0.05, 
+            adj_formula = ”month”,
+            rand_formula = "~ month | studyid")
+```
+
+
 
 
 
