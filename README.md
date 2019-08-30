@@ -102,9 +102,9 @@ res = ANCOM(otu_data = otu_data,
 
 #### Random coefficients/slope model
 
-* _Detection of differentially abundant genera between delivery methods accounting for random time effect and random subject effect_
-* _Each subject has his/her own intercept and slope_
-* _Example dataset: ecam_
+- _Detection of differentially abundant genera between delivery methods accounting for random time effect and random subject effect_
+- _Each subject has his/her own intercept and slope_
+- _Example dataset: ecam_
 
 ```r
 res = ANCOM(otu_data = otu_data, 
