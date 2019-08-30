@@ -26,6 +26,8 @@ library(dplyr)
 
 ## A flowchart of the tests within ANCOM
 
+![Flow Chart](/images/flowchart.png)
+
 ## Function outputs
 
 * ```res```: A data frame with the ```W``` statistic for each taxa and subsequent columns which are logical indicators of whether an OTU or taxon is differentially abundant under a series of cutoffs (0.9, 0.8, 0.7 and 0.6).
