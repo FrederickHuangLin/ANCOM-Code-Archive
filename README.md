@@ -1,5 +1,7 @@
 # User Manual for [ANCOM](https://www.tandfonline.com/doi/full/10.3402/mehd.v26.27663) v2.0
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3472100.svg)](https://doi.org/10.5281/zenodo.3472100)
+
 The current code implements ANCOM in cross-sectional and longitudinal datasets while allowing the use of covariates. The following libraries need to be included for the R code to run:
 
 ```r
