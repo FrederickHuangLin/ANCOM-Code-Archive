@@ -1,6 +1,6 @@
 # User Manual for [ANCOM](https://www.tandfonline.com/doi/full/10.3402/mehd.v26.27663) v2.1
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3472100.svg)](https://doi.org/10.5281/zenodo.3472100)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3577802.svg)](https://doi.org/10.5281/zenodo.3577802)
 
 The current code implements ANCOM in cross-sectional and longitudinal datasets while allowing the use of covariates. The following libraries need to be included for the R code to run:
 
@@ -12,7 +12,9 @@ library(dplyr)
 
 ## Instructions for use
 
-### [Data preprocess](https://www.frontiersin.org/articles/10.3389/fmicb.2017.02114/full)
+### Data preprocess
+
+We adopted the methodology of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5682008/) as the preprocessing step to deal with different types of zeros before performing differential abundance analysis.
 
 #### Usage
 
