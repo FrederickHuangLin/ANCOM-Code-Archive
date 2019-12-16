@@ -1,4 +1,4 @@
-# User Manual for [ANCOM](https://www.tandfonline.com/doi/full/10.3402/mehd.v26.27663) v2.0
+# User Manual for [ANCOM](https://www.tandfonline.com/doi/full/10.3402/mehd.v26.27663) v2.1
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3472100.svg)](https://doi.org/10.5281/zenodo.3472100)
 
@@ -12,7 +12,7 @@ library(dplyr)
 
 ## Instructions for use
 
-### Data preprocess
+### [Data preprocess](https://www.frontiersin.org/articles/10.3389/fmicb.2017.02114/full)
 
 #### Usage
 
@@ -41,7 +41,7 @@ library(dplyr)
 
 * ```ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, alpha, adj_formula, rand_formula)```
 
-####Arguments
+#### Arguments
 
 * ```feature_table```: Data frame representing OTU/taxa data with OTUs (or taxa) in rows and samples in columns. Can be the output value from ```feature_table_pre_process```.
 * ```meta_data```: Data frame of variables. Can be the output value from ```feature_table_pre_process```.
@@ -55,7 +55,7 @@ library(dplyr)
 #### A flowchart of the tests within ANCOM
 ![Flow Chart](/images/flowchart.png)
 
-####Value
+#### Value
 
 * ```res```: A data frame with the ```W``` statistic for each taxa and subsequent columns which are logical indicators of whether an OTU or taxon is differentially abundant under a series of cutoffs (0.9, 0.8, 0.7 and 0.6).
 
