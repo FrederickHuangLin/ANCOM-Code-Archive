@@ -1,4 +1,4 @@
-otu_id,W,detected_0.9,detected_0.8,detected_0.7,detected_0.6
+taxa_id,W,detected_0.9,detected_0.8,detected_0.7,detected_0.6
 4b5eeb300368260019c1fbc7a3c718fc,180,TRUE,TRUE,TRUE,TRUE
 fe30ff0f71a38a39cf1717ec2be3a2fc,0,FALSE,FALSE,FALSE,FALSE
 868528ca947bc57b69ffdf83e6b73bae,180,TRUE,TRUE,TRUE,TRUE

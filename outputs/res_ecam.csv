@@ -1,4 +1,4 @@
-otu_id,W,detected_0.9,detected_0.8,detected_0.7,detected_0.6
+taxa_id,W,detected_0.9,detected_0.8,detected_0.7,detected_0.6
 k__Bacteria;__;__;__;__;__,7,FALSE,FALSE,FALSE,FALSE
 k__Bacteria;p__Actinobacteria;c__Actinobacteria;o__Actinomycetales;f__Actinomycetaceae;g__Actinomyces,5,FALSE,FALSE,FALSE,FALSE
 k__Bacteria;p__Actinobacteria;c__Actinobacteria;o__Actinomycetales;f__Micrococcaceae;g__Rothia,7,FALSE,FALSE,FALSE,FALSE
