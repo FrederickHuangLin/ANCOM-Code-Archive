@@ -1,5 +1,7 @@
 # User Manual for [ANCOM](https://www.tandfonline.com/doi/full/10.3402/mehd.v26.27663) v2.0
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3472100.svg)](https://doi.org/10.5281/zenodo.3472100)
+
 The current code implements ANCOM in cross-sectional and longitudinal datasets while allowing the use of covariates. The following libraries need to be included for the R code to run:
 
 ```r
@@ -51,8 +53,9 @@ library(dplyr)
 * ```rand_formula```: Character string representing the formula for random effects in ```lme``` (see example).
 
 #### A flowchart of the tests within ANCOM
+![Flow Chart](/images/flowchart.png)
 
-#### Value
+####Value
 
 * ```res```: A data frame with the ```W``` statistic for each taxa and subsequent columns which are logical indicators of whether an OTU or taxon is differentially abundant under a series of cutoffs (0.9, 0.8, 0.7 and 0.6).
 
