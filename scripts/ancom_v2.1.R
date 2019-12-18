@@ -1,6 +1,7 @@
 library(exactRankTests)
 library(nlme)
 library(dplyr)
+library(compositions)
 
 # OTU table should be a matrix/data.frame with each feature in rows and sample in columns. 
 # Metadata should be a matrix/data.frame containing the sample identifier. 
@@ -23,7 +24,7 @@ feature_table_pre_process = function(feature_table, meta_data, sample_var, group
     z = feature_table + 1 # Add pseudo-count (1) 
     f = log(z); f[f == 0] = NA; f = colMeans(f, na.rm = T)
     f_fit = lm(f ~ group)
-    e = residuals(f_fit)
+    e = rep(0, length(f)); e[!is.na(group)] = residuals(f_fit)
     y = t(t(z) - e)
     
     outlier_check = function(x){
@@ -66,7 +67,10 @@ feature_table_pre_process = function(feature_table, meta_data, sample_var, group
       }
       return(out_ind)
     }
-    out_ind = t(apply(y, 1, function(i) unlist(tapply(i, group, function(j) outlier_check(j)))))
+    out_ind = matrix(FALSE, nrow = nrow(feature_table), ncol = ncol(feature_table))
+    out_ind[, !is.na(group)] = t(apply(y, 1, function(i) 
+      unlist(tapply(i, group, function(j) outlier_check(j)))))
+    
     feature_table[out_ind] = NA
   }
   
@@ -219,24 +223,67 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
   W = apply(q_data, 2, function(x) sum(x < alpha))
   
   # Organize outputs
-  out = data.frame(taxa_id, W, row.names = NULL, check.names = FALSE)
+  out_comp = data.frame(taxa_id, W, row.names = NULL, check.names = FALSE)
   # Declare a taxon to be differentially abundant based on the quantile of W statistic.
   # We perform (n_taxa - 1) hypothesis testings on each taxon, so the maximum number of rejections is (n_taxa - 1).
-  out = out%>%mutate(detected_0.9 = ifelse(W > 0.9 * (n_taxa -1), TRUE, FALSE),
-                     detected_0.8 = ifelse(W > 0.8 * (n_taxa -1), TRUE, FALSE),
-                     detected_0.7 = ifelse(W > 0.7 * (n_taxa -1), TRUE, FALSE),
-                     detected_0.6 = ifelse(W > 0.6 * (n_taxa -1), TRUE, FALSE))
+  out_comp = out_comp%>%mutate(detected_0.9 = ifelse(W > 0.9 * (n_taxa -1), TRUE, FALSE),
+                               detected_0.8 = ifelse(W > 0.8 * (n_taxa -1), TRUE, FALSE),
+                               detected_0.7 = ifelse(W > 0.7 * (n_taxa -1), TRUE, FALSE),
+                               detected_0.6 = ifelse(W > 0.6 * (n_taxa -1), TRUE, FALSE))
   
   # Taxa with structural zeros are automatically declared to be differentially abundant
   if (!is.null(struc_zero)){
-    res = data.frame(taxa_id = rownames(struc_zero), W = Inf, detected_0.9 = TRUE, 
+    out = data.frame(taxa_id = rownames(struc_zero), W = Inf, detected_0.9 = TRUE, 
                      detected_0.8 = TRUE, detected_0.7 = TRUE, detected_0.6 = TRUE, 
                      row.names = NULL, check.names = FALSE)
-    res[match(taxa_id, res$taxa_id), ] = out
+    out[match(taxa_id, out$taxa_id), ] = out_comp
   }else{
-    res = out
+    out = out_comp
   }
   
+  # Draw volcano plot
+  # Calculate clr
+  clr_table = apply(feature_table, 2, clr)
+  # Calculate clr mean difference
+  eff_size = apply(clr_table, 1, function(y) 
+    lm(y ~ x, data = data.frame(y = y, x = meta_data %>% pull(main_var)))$coef[-1])
+  
+  if (is.matrix(eff_size)){
+    # Data frame for the figure
+    dat_fig = data.frame(taxa_id = out$taxa_id, t(eff_size), y = out$W) %>% 
+      mutate(zero_ind = factor(ifelse(is.infinite(y), "Yes", "No"), levels = c("Yes", "No"))) %>%
+      gather(key = group, value = x, rownames(eff_size))
+    # Replcace "x" to the name of covariate
+    dat_fig$group = sapply(dat_fig$group, function(x) gsub("x", paste0(main_var, " = "), x))
+    # Replace Inf by (n_taxa - 1) for structural zeros
+    dat_fig$y = replace(dat_fig$y, is.infinite(dat_fig$y), n_taxa - 1)
+    
+    fig = ggplot(data = dat_fig) + aes(x = x, y = y) + 
+      geom_point(aes(color = zero_ind)) + 
+      facet_wrap(~ group) +
+      labs(x = "CLR mean difference", y = "W statistic") +
+      scale_color_discrete(name = "Structural zero", drop = FALSE) + 
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5), legend.position = "top",
+            strip.background = element_rect(fill = "white"))
+    fig  
+  } else{
+    # Data frame for the figure
+    dat_fig = data.frame(taxa_id = out$taxa_id, x = eff_size, y = out$W) %>% 
+      mutate(zero_ind = factor(ifelse(is.infinite(y), "Yes", "No"), levels = c("Yes", "No")))
+    # Replace Inf by (n_taxa - 1) for structural zeros
+    dat_fig$y = replace(dat_fig$y, is.infinite(dat_fig$y), n_taxa - 1)
+    
+    fig = ggplot(data = dat_fig) + aes(x = x, y = y) + 
+      geom_point(aes(color = zero_ind)) + 
+      labs(x = "CLR mean difference", y = "W statistic") +
+      scale_color_discrete(name = "Structural zero", drop = FALSE) + 
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5), legend.position = "top")
+    fig
+  }
+  
+  res = list(out = out, fig = fig)
   return(res)
 }
 
