@@ -103,7 +103,7 @@ cut_off = c(0.9 * (n_taxa -1), 0.8 * (n_taxa -1), 0.7 * (n_taxa -1), 0.6 * (n_ta
 names(cut_off) = c("detected_0.9", "detected_0.8", "detected_0.7", "detected_0.6")
 
 # Annotation data
-dat_ann = data.frame(x = 2.5, y = cut_off["detected_0.7"], label = "W[0.7]")
+dat_ann = data.frame(x = min(res$fig$data$x), y = cut_off["detected_0.7"], label = "W[0.7]")
 
 fig = res$fig +  
   geom_hline(yintercept = cut_off["detected_0.7"], linetype = "dashed") + 
@@ -167,7 +167,7 @@ cut_off = c(0.9 * (n_taxa -1), 0.8 * (n_taxa -1), 0.7 * (n_taxa -1), 0.6 * (n_ta
 names(cut_off) = c("detected_0.9", "detected_0.8", "detected_0.7", "detected_0.6")
 
 # Annotation data
-dat_ann = data.frame(x = 1.5, y = cut_off["detected_0.7"], label = "W[0.7]")
+dat_ann = data.frame(x = min(res$fig$data$x), y = cut_off["detected_0.7"], label = "W[0.7]")
 
 fig = res$fig + 
   geom_hline(yintercept = cut_off["detected_0.7"], linetype = "dashed") + 
