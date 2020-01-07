@@ -246,11 +246,13 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
   clr_table = apply(feature_table, 2, clr)
   # Calculate clr mean difference
   eff_size = apply(clr_table, 1, function(y) 
-    lm(y ~ x, data = data.frame(y = y, x = meta_data %>% pull(main_var)))$coef[-1])
+    lm(y ~ x, data = data.frame(y = y, 
+                                x = meta_data %>% pull(main_var),
+                                check.names = FALSE))$coef[-1])
   
   if (is.matrix(eff_size)){
     # Data frame for the figure
-    dat_fig = data.frame(taxa_id = out$taxa_id, t(eff_size), y = out$W) %>% 
+    dat_fig = data.frame(taxa_id = out$taxa_id, t(eff_size), y = out$W, check.names = FALSE) %>% 
       mutate(zero_ind = factor(ifelse(is.infinite(y), "Yes", "No"), levels = c("Yes", "No"))) %>%
       gather(key = group, value = x, rownames(eff_size))
     # Replcace "x" to the name of covariate
