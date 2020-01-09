@@ -1,6 +1,7 @@
 library(exactRankTests)
 library(nlme)
 library(dplyr)
+library(ggplot2)
 library(compositions)
 
 # OTU table should be a matrix/data.frame with each feature in rows and sample in columns. 
