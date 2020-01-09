@@ -8,6 +8,7 @@ The current code implements ANCOM in cross-sectional and longitudinal datasets w
 library(exactRankTests)
 library(nlme)
 library(dplyr)
+library(ggplot2)
 library(compositions)
 ```
 
