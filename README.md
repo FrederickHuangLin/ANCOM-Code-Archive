@@ -31,7 +31,7 @@ We adopted the methodology of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articl
 *	```out_cut``` Numerical fraction between 0 and 1. For each taxon, observations with proportion of mixture distribution less than ```out_cut``` will be detected as outlier zeros; while observations with proportion of mixture distribution greater than ```1 - out_cut``` will be detected as outlier values.
 *	```zero_cut```: Numerical fraction between 0 and 1. Taxa with proportion of zeroes greater than ```zero_cut``` are not included in the analysis.
 * ```lib_cut```: Numeric. Samples with library size less than ```lib_cut``` are not included in the analysis.
-*	```neg_lb```: Logical. TRUE indicates a taxon would be classified as a structural zero in the corresponding experimental group using its asymptotic lower bound. ```neg_lb = TRUE``` indicates you are using both criteria stated in section 3.2 of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5682008/) to detect structural zeros; Otherwise, ```neg_lb = FALSE``` will only use the equation 1 in section 3.2 of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5682008/) for declaring structural zeros.
+*	```neg_lb```: Logical. TRUE indicates a taxon would be classified as a structural zero in the corresponding experimental group using its asymptotic lower bound. More specifically, ```neg_lb = TRUE``` indicates you are using both criteria stated in section 3.2 of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5682008/) to detect structural zeros; Otherwise, ```neg_lb = FALSE``` will only use the equation 1 in section 3.2 of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5682008/) for declaring structural zeros.
 
 #### Value
 
@@ -55,7 +55,7 @@ We adopted the methodology of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articl
 * ```alpha```: Level of significance. Default is 0.05.
 * ```adj_formula```: Character string representing the formula for adjustment (see example).
 * ```rand_formula```: Character string representing the formula for random effects in ```lme``` (see example).
-*```...```: Additional arguments (see example).
+* ```...```: Additional arguments.
 
 #### A flowchart of the tests within ANCOM
 ![Flow Chart](/images/flowchart.png)
