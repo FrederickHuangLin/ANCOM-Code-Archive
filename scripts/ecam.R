@@ -24,10 +24,10 @@ struc_zero = prepro$structure_zeros # Structural zero info
 # Step 2: ANCOM
 
 main_var = "delivery"; p_adj_method = "BH"; alpha = 0.05
-adj_formula = NULL; rand_formula = "~ 1 | studyid"
+adj_formula = NULL; rand_formula = "~ 1 | studyid"; control = list(msMaxIter = 50)
 t_start = Sys.time()
 res = ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, 
-            alpha, adj_formula, rand_formula)
+            alpha, adj_formula, rand_formula, control = control)
 t_end = Sys.time()
 t_run = t_end - t_start # around 30s
 

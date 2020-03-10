@@ -123,7 +123,7 @@ feature_table_pre_process = function(feature_table, meta_data, sample_var, group
 
 # ANCOM main function
 ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_method = "BH", 
-                 alpha = 0.05, adj_formula = NULL, rand_formula = NULL){
+                 alpha = 0.05, adj_formula = NULL, rand_formula = NULL, ...){
   # OTU table transformation: 
   # (1) Discard taxa with structural zeros (if any); (2) Add pseudocount (1) and take logarithm.
   if (!is.null(struc_zero)) {
@@ -205,7 +205,7 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
         fit = tfun(fixed = tformula, 
                    data = data.frame(x, alr_data, check.names = FALSE),
                    random = formula(rand_formula),
-                   na.action = na.omit)
+                   na.action = na.omit, ...)
         anova(fit)[main_var, "p-value"]
         }
       ) 
