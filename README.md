@@ -62,7 +62,7 @@ We adopted the methodology of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articl
 
 #### Value
 
-* ```out```: A data frame with the ```W``` statistic for each taxa and subsequent columns which are logical indicators of whether an OTU or taxon is differentially abundant under a series of cutoffs (0.9, 0.8, 0.7 and 0.6).
+* ```out```: A data frame with the ```W``` statistic for each taxa and subsequent columns which are logical indicators of whether an OTU or taxon is differentially abundant under a series of cutoffs (0.9, 0.8, 0.7 and 0.6). ```detected_0.7``` is commonly used. However, you can choose ```detected_0.8``` or ```detected_0.9``` if you want to be more conservative at your results (smaller FDR), or use ```detected_0.6``` if you would like to explore more discoveries (larger power)
 
 * ```fig```: A ```ggplot``` object of volcano plot.
 
