@@ -27,11 +27,11 @@ We adopted the methodology of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articl
 *	```feature_table```: Data frame or matrix representing observed OTU table with OTUs (or taxa) in rows and samples in columns.
 *	```meta_data```: Data frame or matrix of all variables and covariates of interest.
 *	```sample_var```: Character. The name of column storing sample IDs.
-*	```group_var```: Character. The name of the group indicator. ```group_var``` is required for detecting structural zeros and outliers.
+*	```group_var```: Character. The name of the group indicator. ```group_var``` is required for detecting structural zeros and outliers. For the definitions of different zeros (structural zero, outlier zero, and sampling zero), please refer to [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5682008/).
 *	```out_cut``` Numerical fraction between 0 and 1. For each taxon, observations with proportion of mixture distribution less than ```out_cut``` will be detected as outlier zeros; while observations with proportion of mixture distribution greater than ```1 - out_cut``` will be detected as outlier values.
 *	```zero_cut```: Numerical fraction between 0 and 1. Taxa with proportion of zeroes greater than ```zero_cut``` are not included in the analysis.
 * ```lib_cut```: Numeric. Samples with library size less than ```lib_cut``` are not included in the analysis.
-*	```neg_lb```: Logical. TRUE indicates a taxon would be classified as a structural zero in the corresponding experimental group using its asymptotic lower bound.
+*	```neg_lb```: Logical. TRUE indicates a taxon would be classified as a structural zero in the corresponding experimental group using its asymptotic lower bound. ```neg_lb = TRUE``` indicates you are using both criteria stated in section 3.2 of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5682008/) to detect structural zeros; Otherwise, ```neg_lb = FALSE``` will only use the equation 1 in section 3.2 of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5682008/) for declaring structural zeros.
 
 #### Value
 
@@ -43,18 +43,19 @@ We adopted the methodology of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articl
 
 #### Usage
 
-* ```ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, alpha, adj_formula, rand_formula)```
+* ```ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, alpha, adj_formula, rand_formula, ...)```
 
 #### Arguments
 
 * ```feature_table```: Data frame representing OTU/taxa data with OTUs (or taxa) in rows and samples in columns. Can be the output value from ```feature_table_pre_process```.
 * ```meta_data```: Data frame of variables. Can be the output value from ```feature_table_pre_process```.
 * ```struc_zero```: A matrix consists of 0 and 1s with 1 indicating the taxon is identified as a structural zero in the corresponding group. Can be the output value from ```feature_table_pre_process```.
-* ```main_var```: Character. The name of the main variable of interest. 
+* ```main_var```: Character. The name of the main variable of interest. ANCOM v2.1 currently supports categorical ```main_var```.
 * ```p_adjust_method```: Character. Specifying the method to adjust p-values for multiple comparisons. Default is “BH” (Benjamini-Hochberg procedure).
 * ```alpha```: Level of significance. Default is 0.05.
 * ```adj_formula```: Character string representing the formula for adjustment (see example).
 * ```rand_formula```: Character string representing the formula for random effects in ```lme``` (see example).
+*```...```: Additional arguments (see example).
 
 #### A flowchart of the tests within ANCOM
 ![Flow Chart](/images/flowchart.png)
@@ -150,10 +151,10 @@ struc_zero = prepro$structure_zeros # Structural zero info
 # Step 2: ANCOM
 
 main_var = "delivery"; p_adj_method = "BH"; alpha = 0.05
-adj_formula = NULL; rand_formula = "~ 1 | studyid"
+adj_formula = NULL; rand_formula = "~ 1 | studyid"; control = list(msMaxIter = 50)
 t_start = Sys.time()
 res = ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, 
-            alpha, adj_formula, rand_formula)
+            alpha, adj_formula, rand_formula, control)
 t_end = Sys.time()
 t_run = t_end - t_start # around 30s
 
