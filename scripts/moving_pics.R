@@ -7,7 +7,7 @@ otu_data = data.frame(otu_data[, -1], check.names = FALSE)
 rownames(otu_data) = otu_id
 
 meta_data = read_tsv("data/moving-pics-sample-metadata.tsv")[-1, ]
-meta_data = meta_data%>%rename(Sample.ID = SampleID)
+meta_data = meta_data %>% rename(Sample.ID = SampleID)
 
 source("scripts/ancom_v2.1.R")
 

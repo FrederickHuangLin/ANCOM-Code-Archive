@@ -9,7 +9,7 @@ library(compositions)
 
 # Data Pre-Processing
 feature_table_pre_process = function(feature_table, meta_data, sample_var, group_var = NULL, 
-                                     out_cut = 0.05, zero_cut = 0.90, lib_cut = 1000, neg_lb){
+                                     out_cut = 0.05, zero_cut = 0.90, lib_cut, neg_lb){
   feature_table = data.frame(feature_table, check.names = FALSE)
   meta_data = data.frame(meta_data, check.names = FALSE)
   # Drop unused levels
