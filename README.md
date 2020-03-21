@@ -24,7 +24,7 @@ We adopted the methodology of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articl
 
 #### Arguments
 
-*	```feature_table```: Data frame or matrix representing observed OTU/SV table with taxa in rows and samples in columns. Note that this is the **absolute** abundance table, do not transform it to **relative** abundance table (where the column totals are equal to 1).
+*	```feature_table```: Data frame or matrix representing observed OTU/SV table with taxa in rows (```rownames```) and samples in columns (```colnames```). Note that this is the **absolute** abundance table, do not transform it to **relative** abundance table (where the column totals are equal to 1).
 *	```meta_data```: Data frame or matrix of all variables and covariates of interest.
 *	```sample_var```: Character. The name of column storing sample IDs.
 *	```group_var```: Character. The name of the group indicator. ```group_var``` is required for detecting structural zeros and outliers. For the definitions of different zeros (structural zero, outlier zero, and sampling zero), please refer to [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5682008/).
@@ -47,7 +47,7 @@ We adopted the methodology of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articl
 
 #### Arguments
 
-* ```feature_table```: Data frame representing OTU/SV table with taxa in rows and samples in columns. It can be the output value from ```feature_table_pre_process```. Note that this is the **absolute** abundance table, do not transform it to **relative** abundance table (where the column totals are equal to 1).
+* ```feature_table```: Data frame representing OTU/SV table with taxa in rows (```rownames```) and samples in columns (```colnames```). It can be the output value from ```feature_table_pre_process```. Note that this is the **absolute** abundance table, do not transform it to **relative** abundance table (where the column totals are equal to 1).
 * ```meta_data```: Data frame of variables. Can be the output value from ```feature_table_pre_process```.
 * ```struc_zero```: A matrix consists of 0 and 1s with 1 indicating the taxon is identified as a structural zero in the corresponding group. Can be the output value from ```feature_table_pre_process```.
 * ```main_var```: Character. The name of the main variable of interest. ANCOM v2.1 currently supports categorical ```main_var```.
