@@ -20,11 +20,11 @@ We adopted the methodology of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articl
 
 #### Usage
 
-* ```feature_table_pre_process(feature_table, meta_data, sample_var, group_var = NULL, out_cut = 0.05, zero_cut = 0.90, lib_cut = 1000, neg_lb)```
+* ```feature_table_pre_process(feature_table, meta_data, sample_var, group_var = NULL, out_cut = 0.05, zero_cut = 0.90, lib_cut, neg_lb)```
 
 #### Arguments
 
-*	```feature_table```: Data frame or matrix representing observed OTU table with OTUs (or taxa) in rows and samples in columns.
+*	```feature_table```: Data frame or matrix representing observed OTU/SV table with taxa in rows and samples in columns. Note that this is the **absolute** abundance table, do not transform it to **relative** abundance table (where the column totals are equal to 1).
 *	```meta_data```: Data frame or matrix of all variables and covariates of interest.
 *	```sample_var```: Character. The name of column storing sample IDs.
 *	```group_var```: Character. The name of the group indicator. ```group_var``` is required for detecting structural zeros and outliers. For the definitions of different zeros (structural zero, outlier zero, and sampling zero), please refer to [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5682008/).
@@ -47,7 +47,7 @@ We adopted the methodology of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articl
 
 #### Arguments
 
-* ```feature_table```: Data frame representing OTU/taxa data with OTUs (or taxa) in rows and samples in columns. Can be the output value from ```feature_table_pre_process```.
+* ```feature_table```: Data frame representing OTU/SV table with taxa in rows and samples in columns. It can be the output value from ```feature_table_pre_process```. Note that this is the **absolute** abundance table, do not transform it to **relative** abundance table (where the column totals are equal to 1).
 * ```meta_data```: Data frame of variables. Can be the output value from ```feature_table_pre_process```.
 * ```struc_zero```: A matrix consists of 0 and 1s with 1 indicating the taxon is identified as a structural zero in the corresponding group. Can be the output value from ```feature_table_pre_process```.
 * ```main_var```: Character. The name of the main variable of interest. ANCOM v2.1 currently supports categorical ```main_var```.
@@ -70,10 +70,24 @@ We adopted the methodology of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articl
 
 ### Standard analysis
 
-_Detection of differentially abundant OTU between subjects_ <br/>
-_Example dataset: moving-pics_
+* Detection of differentially abundant taxa across different experimental groups (here is "Subject")
+* Example OTU table: data/moving-pics-table.tsv
+* Example meta data: data/moving-pics-sample-metadata.tsv
 
 ```r
+library(readr)
+library(tidyverse)
+
+otu_data = read_tsv("data/moving-pics-table.tsv", skip = 1)
+otu_id = otu_data$`feature-id`
+otu_data = data.frame(otu_data[, -1], check.names = FALSE)
+rownames(otu_data) = otu_id
+
+meta_data = read_tsv("data/moving-pics-sample-metadata.tsv")[-1, ]
+meta_data = meta_data %>% rename(Sample.ID = SampleID)
+
+source("scripts/ancom_v2.1.R")
+
 # Step 1: Data preprocessing
 
 feature_table = otu_data; sample_var = "Sample.ID"; group_var = NULL
@@ -116,10 +130,36 @@ fig
 
 ### Adjusted for covariates
 
-_Detection of differentially abundant OTU between subjects adjusted for antibiotic usage_ <br/>
-_Example dataset: moving-pics_
+* Detection of differentially abundant taxa across different experimental groups (here is "Subject") while adjusting for other covariates (here is ”ReportedAntibioticUsage”)
+* Example OTU table: data/moving-pics-table.tsv
+* Example meta data: data/moving-pics-sample-metadata.tsv
 
 ```r
+library(readr)
+library(tidyverse)
+
+otu_data = read_tsv("data/moving-pics-table.tsv", skip = 1)
+otu_id = otu_data$`feature-id`
+otu_data = data.frame(otu_data[, -1], check.names = FALSE)
+rownames(otu_data) = otu_id
+
+meta_data = read_tsv("data/moving-pics-sample-metadata.tsv")[-1, ]
+meta_data = meta_data %>% rename(Sample.ID = SampleID)
+
+source("scripts/ancom_v2.1.R")
+
+# Step 1: Data preprocessing
+
+feature_table = otu_data; sample_var = "Sample.ID"; group_var = NULL
+out_cut = 0.05; zero_cut = 0.90; lib_cut = 1000; neg_lb = FALSE
+prepro = feature_table_pre_process(feature_table, meta_data, sample_var, group_var, 
+                                   out_cut, zero_cut, lib_cut, neg_lb)
+feature_table = prepro$feature_table # Preprocessed feature table
+meta_data = prepro$meta_data # Preprocessed metadata
+struc_zero = prepro$structure_zeros # Structural zero info
+
+# Step 2: ANCOM
+
 main_var = "Subject"; p_adj_method = "BH"; alpha = 0.05
 adj_formula = ”ReportedAntibioticUsage”; rand_formula = NULL
 t_start = Sys.time()
@@ -133,11 +173,25 @@ t_run = t_end - t_start
 
 #### Random intercept model
 
-_Detection of differentially abundant genera between delivery methods accounting for random subject effect_ <br/>
-_Each subject has his/her own intercept_ <br/>
-_Example dataset: ecam_
+* Detection of differentially abundant taxa across different experimental groups (here is "delivery") while accounting for random effects (here is random subject effect ”studyid”)
+* Example OTU table: data/ecam-table-taxa.tsv
+* Example meta data: data/ecam-sample-metadata.tsv
+* Identify structural zeros by specifying ```group_var```. Here we would like to know whether there are some structural zeros across different levels of ```delivery```
 
 ```r
+library(readr)
+library(tidyverse)
+
+otu_data = read_tsv("data/ecam-table-taxa.tsv", skip = 1)
+otu_id = otu_data$`feature-id`
+otu_data = data.frame(otu_data[, -1], check.names = FALSE)
+rownames(otu_data) = otu_id
+
+meta_data = read_tsv("data/ecam-sample-metadata.tsv")[-1, ]
+meta_data = meta_data %>% rename(Sample.ID = `#SampleID`)
+
+source("scripts/ancom_v2.1.R")
+
 # Step 1: Data preprocessing
 
 feature_table = otu_data; sample_var = "Sample.ID"; group_var = "delivery"
@@ -180,11 +234,37 @@ fig
 
 #### Random intercept model adjusted for other covariates
 
-_Detection of differentially abundant genera between delivery methods accounting for fixed time effect and random subject effect_ <br/>
-_Each subject has his/her own intercept_ <br/>
-_Example dataset: ecam_
+* Detection of differentially abundant taxa across different experimental groups (here is "delivery") while accounting for random effects (here is random subject effect "studyid”) and adjusting for other covariates (here is ”month”)
+* Example OTU table: data/ecam-table-taxa.tsv
+* Example meta data: data/ecam-sample-metadata.tsv
+* Identify structural zeros by specifying ```group_var```. Here we would like to know whether there are some structural zeros across different levels of ```delivery```
 
 ```r
+library(readr)
+library(tidyverse)
+
+otu_data = read_tsv("data/ecam-table-taxa.tsv", skip = 1)
+otu_id = otu_data$`feature-id`
+otu_data = data.frame(otu_data[, -1], check.names = FALSE)
+rownames(otu_data) = otu_id
+
+meta_data = read_tsv("data/ecam-sample-metadata.tsv")[-1, ]
+meta_data = meta_data %>% rename(Sample.ID = `#SampleID`)
+
+source("scripts/ancom_v2.1.R")
+
+# Step 1: Data preprocessing
+
+feature_table = otu_data; sample_var = "Sample.ID"; group_var = "delivery"
+out_cut = 0.05; zero_cut = 0.90; lib_cut = 0; neg_lb = TRUE
+prepro = feature_table_pre_process(feature_table, meta_data, sample_var, group_var, 
+                                   out_cut, zero_cut, lib_cut, neg_lb)
+feature_table = prepro$feature_table # Preprocessed feature table
+meta_data = prepro$meta_data # Preprocessed metadata
+struc_zero = prepro$structure_zeros # Structural zero info
+
+# Step 2: ANCOM
+
 main_var = "delivery"; p_adj_method = "BH"; alpha = 0.05
 adj_formula = "month"; rand_formula = "~ 1 | studyid"
 t_start = Sys.time()
@@ -196,11 +276,37 @@ t_run = t_end - t_start
 
 #### Random coefficients/slope model
 
-_Detection of differentially abundant genera between delivery methods accounting for random time effect and random subject effect_ <br/> 
-_Each subject has his/her own intercept and slope_ <br/> 
-_Example dataset: ecam_
+* Detection of differentially abundant taxa across different experimental groups (here is "delivery") while accounting for random effects (here are random time effect "month", and random subject effect "studyid”) and adjusting for other covariates (here is ”month”)
+* Example OTU table: data/ecam-table-taxa.tsv
+* Example meta data: data/ecam-sample-metadata.tsv
+* Identify structural zeros by specifying ```group_var```. Here we would like to know whether there are some structural zeros across different levels of ```delivery```
 
 ```r
+library(readr)
+library(tidyverse)
+
+otu_data = read_tsv("data/ecam-table-taxa.tsv", skip = 1)
+otu_id = otu_data$`feature-id`
+otu_data = data.frame(otu_data[, -1], check.names = FALSE)
+rownames(otu_data) = otu_id
+
+meta_data = read_tsv("data/ecam-sample-metadata.tsv")[-1, ]
+meta_data = meta_data %>% rename(Sample.ID = `#SampleID`)
+
+source("scripts/ancom_v2.1.R")
+
+# Step 1: Data preprocessing
+
+feature_table = otu_data; sample_var = "Sample.ID"; group_var = "delivery"
+out_cut = 0.05; zero_cut = 0.90; lib_cut = 0; neg_lb = TRUE
+prepro = feature_table_pre_process(feature_table, meta_data, sample_var, group_var, 
+                                   out_cut, zero_cut, lib_cut, neg_lb)
+feature_table = prepro$feature_table # Preprocessed feature table
+meta_data = prepro$meta_data # Preprocessed metadata
+struc_zero = prepro$structure_zeros # Structural zero info
+
+# Step 2: ANCOM
+
 main_var = "delivery"; p_adj_method = "BH"; alpha = 0.05
 adj_formula = "month"; rand_formula = "~ month | studyid"
 t_start = Sys.time()
