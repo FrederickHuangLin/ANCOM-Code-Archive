@@ -123,7 +123,7 @@ feature_table_pre_process = function(feature_table, meta_data, sample_var, group
 
 # ANCOM main function
 ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_method = "BH", 
-                 alpha = 0.05, adj_formula = NULL, rand_formula = NULL, ...){
+                 alpha = 0.05, adj_formula = NULL, rand_formula = NULL, autoW = FALSE){
   # OTU table transformation: 
   # (1) Discard taxa with structural zeros (if any); (2) Add pseudocount (1) and take logarithm.
   if (!is.null(struc_zero)) {
@@ -190,7 +190,7 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
     if (is.null(rand_formula) & is.null(adj_formula)) {
       p_data[-(1:i), i] = apply(alr_data[, 1:n_lr, drop = FALSE], 2, function(x){
         tfun(tformula, data = data.frame(x, alr_data, check.names = FALSE))$p.value
-        }
+      }
       ) 
     }else if (is.null(rand_formula) & !is.null(adj_formula)) {
       p_data[-(1:i), i] = apply(alr_data[, 1:n_lr, drop = FALSE], 2, function(x){
@@ -198,16 +198,16 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
                    data = data.frame(x, alr_data, check.names = FALSE), 
                    na.action = na.omit)
         summary(fit)[[1]][main_var, "Pr(>F)"]
-        }
+      }
       )
     }else if (!is.null(rand_formula)) {
       p_data[-(1:i), i] = apply(alr_data[, 1:n_lr, drop = FALSE], 2, function(x){
         fit = tfun(fixed = tformula, 
                    data = data.frame(x, alr_data, check.names = FALSE),
                    random = formula(rand_formula),
-                   na.action = na.omit, ...)
+                   na.action = na.omit)
         anova(fit)[main_var, "p-value"]
-        }
+      }
       ) 
     }
   }
@@ -223,23 +223,71 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
   # For each taxon, count the number of q-values < alpha.
   W = apply(q_data, 2, function(x) sum(x < alpha))
   
+  # Define W threshold
+  if (autoW){
+    theta = 0.1
+    tau = 0.02
+    c_start = max(W, na.rm=T) / n_taxa
+    
+    if (c_start < tau) {
+      reject = rep(FALSE, n_taxa)
+      autow = FALSE
+    } else {
+      cutoff = c_start - seq(from=0.05, to=0.25, length.out=5)
+      prop_cut = rep(0, length(cutoff))
+      for (i in 1:length(cutoff)){
+        prop_cut[i] <- mean(W>n_taxa*cutoff[i], na.rm=T)
+      }
+      
+      dels = abs(prop_cut - c(tail(prop_cut,-1) , head(prop_cut,1)))
+      dels[length(dels)] = 0
+      if ((dels[1] < tau) & (dels[2] < tau) & (dels[3] < tau)) { nu = cutoff[2] }
+      else if ((dels[1] >= tau) & (dels[2] < tau) & (dels[3] < tau)) { nu = cutoff[3] }
+      else if ((dels[2] >= tau) & (dels[3] < tau) & (dels[4] < tau)) { nu = cutoff[4] }
+      else {nu = cutoff[5]}
+      
+      autow = nu*n_taxa
+      # Define column that declare differentially abundant based on automatic W.
+      reject = (W >= autow)
+    }
+  }
+  
   # Organize outputs
   out_comp = data.frame(taxa_id, W, row.names = NULL, check.names = FALSE)
   # Declare a taxon to be differentially abundant based on the quantile of W statistic.
   # We perform (n_taxa - 1) hypothesis testings on each taxon, so the maximum number of rejections is (n_taxa - 1).
-  out_comp = out_comp%>%mutate(detected_0.9 = ifelse(W > 0.9 * (n_taxa -1), TRUE, FALSE),
-                               detected_0.8 = ifelse(W > 0.8 * (n_taxa -1), TRUE, FALSE),
-                               detected_0.7 = ifelse(W > 0.7 * (n_taxa -1), TRUE, FALSE),
-                               detected_0.6 = ifelse(W > 0.6 * (n_taxa -1), TRUE, FALSE))
-  
-  # Taxa with structural zeros are automatically declared to be differentially abundant
-  if (!is.null(struc_zero)){
-    out = data.frame(taxa_id = rownames(struc_zero), W = Inf, detected_0.9 = TRUE, 
-                     detected_0.8 = TRUE, detected_0.7 = TRUE, detected_0.6 = TRUE, 
-                     row.names = NULL, check.names = FALSE)
-    out[match(taxa_id, out$taxa_id), ] = out_comp
+  if (autoW){
+    out_comp = out_comp%>%mutate(detected_0.9 = ifelse(W > 0.9 * (n_taxa -1), TRUE, FALSE),
+                                 detected_0.8 = ifelse(W > 0.8 * (n_taxa -1), TRUE, FALSE),
+                                 detected_0.7 = ifelse(W > 0.7 * (n_taxa -1), TRUE, FALSE),
+                                 detected_0.6 = ifelse(W > 0.6 * (n_taxa -1), TRUE, FALSE),
+                                 reject = reject)
+    
+    # Taxa with structural zeros are automatically declared to be differentially abundant
+    if (!is.null(struc_zero)){
+      out = data.frame(taxa_id = rownames(struc_zero), W = Inf, detected_0.9 = TRUE, 
+                       detected_0.8 = TRUE, detected_0.7 = TRUE, detected_0.6 = TRUE, 
+                       row.names = NULL, check.names = FALSE, reject = TRUE)
+      out[match(taxa_id, out$taxa_id), ] = out_comp
+    }else{
+      out = out_comp
+    }
+    
   }else{
-    out = out_comp
+    out_comp = out_comp%>%mutate(detected_0.9 = ifelse(W > 0.9 * (n_taxa -1), TRUE, FALSE),
+                                 detected_0.8 = ifelse(W > 0.8 * (n_taxa -1), TRUE, FALSE),
+                                 detected_0.7 = ifelse(W > 0.7 * (n_taxa -1), TRUE, FALSE),
+                                 detected_0.6 = ifelse(W > 0.6 * (n_taxa -1), TRUE, FALSE))
+    
+    # Taxa with structural zeros are automatically declared to be differentially abundant
+    if (!is.null(struc_zero)){
+      out = data.frame(taxa_id = rownames(struc_zero), W = Inf, detected_0.9 = TRUE, 
+                       detected_0.8 = TRUE, detected_0.7 = TRUE, detected_0.6 = TRUE, 
+                       row.names = NULL, check.names = FALSE)
+      out[match(taxa_id, out$taxa_id), ] = out_comp
+    }else{
+      out = out_comp
+    }
   }
   
   # Draw volcano plot
@@ -286,7 +334,9 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
     fig
   }
   
-  res = list(out = out, fig = fig)
+  # If autoW=TRUE, return automatically defined W, and results with additional column.
+  if (autoW){  res = list(out = out, fig = fig, autoW=autow) }
+  else { res = list(out = out, fig = fig) }
   return(res)
 }
 
