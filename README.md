@@ -10,6 +10,7 @@ library(nlme)
 library(dplyr)
 library(ggplot2)
 library(compositions)
+source("scripts/ancom_v2.1.R")
 ```
 
 ## Instructions for use
