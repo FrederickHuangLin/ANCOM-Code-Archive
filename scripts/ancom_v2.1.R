@@ -1,4 +1,3 @@
-library(exactRankTests)
 library(nlme)
 library(dplyr)
 library(ggplot2)
@@ -143,7 +142,7 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
     # Whether the main variable of interest has two levels or more?
     if (length(unique(meta_data%>%pull(main_var))) == 2) {
       # Two levels: Wilcoxon rank-sum test
-      tfun = exactRankTests::wilcox.exact
+      tfun = stats::wilcox.test
     } else{
       # More than two levels: Kruskal-Wallis test
       tfun = stats::kruskal.test
@@ -189,7 +188,9 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
     # P-values
     if (is.null(rand_formula) & is.null(adj_formula)) {
       p_data[-(1:i), i] = apply(alr_data[, 1:n_lr, drop = FALSE], 2, function(x){
-        tfun(tformula, data = data.frame(x, alr_data, check.names = FALSE))$p.value
+        suppressWarnings(tfun(tformula, 
+                              data = data.frame(x, alr_data, 
+                                                check.names = FALSE))$p.value)
         }
       ) 
     }else if (is.null(rand_formula) & !is.null(adj_formula)) {
@@ -215,6 +216,7 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
   # What we got from above iterations is a lower triangle matrix of p-values.
   p_data[upper.tri(p_data)] = t(p_data)[upper.tri(p_data)]
   diag(p_data) = 1 # let p-values on diagonal equal to 1
+  p_data[is.na(p_data)] = 1 # let p-values of NA equal to 1
   
   # Multiple comparisons correction.
   q_data = apply(p_data, 2, function(x) p.adjust(x, method = p_adj_method))

@@ -5,7 +5,6 @@
 The current code implements ANCOM in cross-sectional and longitudinal datasets while allowing the use of covariates. The following libraries need to be included for the R code to run:
 
 ```r
-library(exactRankTests)
 library(nlme)
 library(dplyr)
 library(ggplot2)
@@ -210,7 +209,7 @@ adj_formula = NULL; rand_formula = "~ 1 | studyid"
 control = lmeControl(maxIter = 100, msMaxIter = 100, opt = "optim")
 t_start = Sys.time()
 res = ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, 
-            alpha, adj_formula, rand_formula, control)
+            alpha, adj_formula, rand_formula, control = control)
 t_end = Sys.time()
 t_run = t_end - t_start # around 30s
 
