@@ -213,7 +213,7 @@ res = ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method,
 t_end = Sys.time()
 t_run = t_end - t_start # around 30s
 
-write_csv(res, "outputs/res_ecam.csv")
+write_csv(res$out, "outputs/res_ecam.csv")
 
 # Step 3: Volcano Plot
 
