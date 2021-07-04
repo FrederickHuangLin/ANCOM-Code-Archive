@@ -2,6 +2,8 @@ library(nlme)
 library(dplyr)
 library(ggplot2)
 library(compositions)
+library(zCompositions)
+library(lmerTest)
 
 # OTU table should be a matrix/data.frame with each feature in rows and sample in columns. 
 # Metadata should be a matrix/data.frame containing the sample identifier. 
@@ -121,8 +123,8 @@ feature_table_pre_process = function(feature_table, meta_data, sample_var, group
 }
 
 # ANCOM main function
-ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_method = "BH", 
-                 alpha = 0.05, adj_formula = NULL, rand_formula = NULL, ...){
+ancom = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_method = "BH", 
+                 alpha = 0.05, adj_formula = NULL, rand_formula = NULL, imp_pseudocount, ...){
   # OTU table transformation: 
   # (1) Discard taxa with structural zeros (if any); (2) Add pseudocount (1) and take logarithm.
   if (!is.null(struc_zero)) {
@@ -131,7 +133,27 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
   }else{
     comp_table = feature_table
   }
-  comp_table = log(as.matrix(comp_table) + 1)
+  if (imp_pseudocount== TRUE) {
+    comp_table = log(as.matrix(comp_table) + 1) #previously default choice
+  } else {
+    comp_table_NA= t(comp_table) #sample in rows for imputing zeros
+    comp_table_temp= t(comp_table)
+    comp_table_temp[is.na(comp_table_temp)]= 0 #temporarily substitue NA by zero for cmultRepl()
+    
+    comp_table_temp_test= apply(comp_table_temp, 2, function(x) sum(x==0, na.rm=T)) 
+    if (length(which(comp_table_temp_test >= nrow(comp_table_temp)-1)) != 0) {
+      comp_table_temp= comp_table_temp[,-c(which(comp_table_temp_test >= nrow(comp_table_temp)-1))]
+      comp_table_NA= comp_table_NA[,-c(which(comp_table_temp_test >= nrow(comp_table_temp)-1))]
+    } else {
+      comp_table_temp= comp_table_temp
+      comp_table_NA= comp_table_NA
+    }
+    #Impute zeros
+    comp_table= cmultRepl(comp_table_temp, label= 0, method= "GBM", delta= 0.65, output= "p-counts")
+    comp_table[is.na(comp_table_NA)]= NA #re-introduce NA where outlier zeros were detected
+    comp_table= t(comp_table) #OTU/ASV in rows again for ancom()
+    comp_table= log(as.matrix(comp_table))
+  }
   n_taxa = dim(comp_table)[1]
   taxa_id = rownames(comp_table)
   n_samp = dim(comp_table)[2]
@@ -156,14 +178,14 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
     tformula = formula(paste("x ~", main_var, "+", adj_formula, sep = " "))
   }else if (!is.null(rand_formula)) {
     # Model: Mixed-effects model
-    tfun = nlme::lme
+    tfun= lmerTest::lmer
     # Formula
     if (is.null(adj_formula)) {
       # Random intercept model
-      tformula = formula(paste("x ~", main_var))
+      tformula = paste("x ~", main_var)
     }else {
       # Random coefficients/slope model
-      tformula = formula(paste("x ~", main_var, "+", adj_formula))
+      tformula = paste("x ~", main_var, "+", adj_formula)
     }
   }
   
@@ -203,11 +225,10 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
       )
     }else if (!is.null(rand_formula)) {
       p_data[-(1:i), i] = apply(alr_data[, 1:n_lr, drop = FALSE], 2, function(x){
-        fit = tfun(fixed = tformula, 
+        fit = tfun(formula(paste(tformula,"+",rand_formula)), 
                    data = data.frame(x, alr_data, check.names = FALSE),
-                   random = formula(rand_formula),
                    na.action = na.omit, ...)
-        anova(fit)[main_var, "p-value"]
+        anova(fit, type= "1")[main_var, "Pr(>F)"]
         }
       ) 
     }
