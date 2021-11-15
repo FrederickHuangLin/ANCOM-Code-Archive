@@ -228,7 +228,7 @@ ancom = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
         fit = tfun(formula(paste(tformula,"+",rand_formula)), 
                    data = data.frame(x, alr_data, check.names = FALSE),
                    na.action = na.omit, ...)
-        anova(fit, type= "1")[main_var, "Pr(>F)"]
+        anova(fit)[main_var, "Pr(>F)"]
         }
       ) 
     }
