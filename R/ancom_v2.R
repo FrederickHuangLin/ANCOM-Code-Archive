@@ -214,6 +214,15 @@ feature_table_pre_process <- function(feature_table,
 #' @return list
 #' @export
 #' @import ggplot2
+#' 
+#' @examples 
+#' prepro <- moving_pics_prepro
+#' ANCOM(
+#'   feature_table = prepro$feature_table, 
+#'   meta_data = prepro$meta_data,
+#'   struc_zero = prepro$structure_zeros, 
+#'   main_var = "Subject"
+#' )
 ANCOM <- function(feature_table,
                   meta_data,
                   struc_zero = NULL,
