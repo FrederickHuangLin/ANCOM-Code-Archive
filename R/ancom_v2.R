@@ -356,7 +356,7 @@ ANCOM <- function(feature_table,
   
   # Draw volcano plot
   # Calculate clr
-  clr_table <- apply(feature_table, 2, clr)
+  clr_table <- apply(feature_table, 2, compositions::clr)
   # Calculate clr mean difference
   eff_size <- apply(clr_table, 1, function(y) {
     stats::lm(y ~ x,
