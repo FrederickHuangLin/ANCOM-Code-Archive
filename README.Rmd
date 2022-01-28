@@ -23,7 +23,7 @@ devtools::install_github("xec-cm/ANCOM")
 
 ## Usage
 
-```{r}
+```{r, fig.align='center'}
 library(ANCOM)
 
 # Step 0: Load or define input data
@@ -57,7 +57,7 @@ res <- ANCOM(
   rand_formula = NULL
 )
 
-res
+head(res)
 ```
 
 ## Getting help
