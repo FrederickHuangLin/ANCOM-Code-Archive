@@ -53,8 +53,10 @@ moving_pics_prepro <- feature_table_pre_process(
 usethis::use_data(
   ecam_sample_metadata,
   ecam_table_taxa,
+  ecam_prepro,
   moving_pics_sample_metadata,
   moving_pics_table_taxa,
+  moving_pics_prepro,
   internal = TRUE,
   overwrite = TRUE
 )
