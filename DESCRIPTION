@@ -1,9 +1,9 @@
 Package: ANCOM
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Analysis of Microbiome Data in the Presence of Excess Zeros
+Version: 2.2
 Authors@R: 
-    person("Francesc", "Catala-Moll", , "fcatalamoll@gmail.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+   person("Francesc", "Catala-Moll", , "fcatalamoll@gmail.com", role = c("aut", "cre"))
+Description: The current code implements ANCOM in cross-sectional and longitudinal datasets while allowing the use of covariates.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
