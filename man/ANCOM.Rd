@@ -58,4 +58,23 @@ ANCOM(
   struc_zero = prepro$structure_zeros, 
   main_var = "Subject"
 )
+
+prepro <- ANCOM:::ecam_prepro
+ANCOM(
+  feature_table = prepro$feature_table, 
+  meta_data = prepro$meta_data,
+  struc_zero = prepro$structure_zeros, 
+  main_var = "delivery", 
+  adj_formula = "month",
+  rand_formula = "~ 1 | studyid"
+)
+
+prepro <- ANCOM:::ecam_prepro
+ANCOM(
+  feature_table = prepro$feature_table, 
+  meta_data = prepro$meta_data,
+  struc_zero = prepro$structure_zeros, 
+  main_var = "delivery", 
+  adj_formula = "month"
+)
 }

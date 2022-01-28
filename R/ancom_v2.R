@@ -102,6 +102,17 @@ outlier_check <- function(x, out_cut) {
 #'   lib_cut = 0,
 #'   neg_lb = TRUE
 #' )
+#' 
+#' feature_table_pre_process(
+#'   feature_table = ANCOM:::moving_pics_table_taxa,
+#'   meta_data = ANCOM:::moving_pics_sample_metadata,
+#'   sample_var = "Sample.ID",
+#'   group_var = NULL,
+#'   out_cut = 0.05,
+#'   zero_cut = 0.90,
+#'   lib_cut = 1000,
+#'   neg_lb = FALSE
+#' )
 feature_table_pre_process <- function(feature_table,
                                       meta_data,
                                       sample_var,
@@ -222,6 +233,25 @@ feature_table_pre_process <- function(feature_table,
 #'   meta_data = prepro$meta_data,
 #'   struc_zero = prepro$structure_zeros, 
 #'   main_var = "Subject"
+#' )
+#' 
+#' prepro <- ANCOM:::ecam_prepro
+#' ANCOM(
+#'   feature_table = prepro$feature_table, 
+#'   meta_data = prepro$meta_data,
+#'   struc_zero = prepro$structure_zeros, 
+#'   main_var = "delivery", 
+#'   adj_formula = "month",
+#'   rand_formula = "~ 1 | studyid"
+#' )
+#' 
+#' prepro <- ANCOM:::ecam_prepro
+#' ANCOM(
+#'   feature_table = prepro$feature_table, 
+#'   meta_data = prepro$meta_data,
+#'   struc_zero = prepro$structure_zeros, 
+#'   main_var = "delivery", 
+#'   adj_formula = "month"
 #' )
 ANCOM <- function(feature_table,
                   meta_data,

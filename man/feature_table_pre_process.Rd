@@ -63,4 +63,15 @@ feature_table_pre_process(
   lib_cut = 0,
   neg_lb = TRUE
 )
+
+feature_table_pre_process(
+  feature_table = ANCOM:::moving_pics_table_taxa,
+  meta_data = ANCOM:::moving_pics_sample_metadata,
+  sample_var = "Sample.ID",
+  group_var = NULL,
+  out_cut = 0.05,
+  zero_cut = 0.90,
+  lib_cut = 1000,
+  neg_lb = FALSE
+)
 }
