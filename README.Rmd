@@ -57,7 +57,7 @@ res <- ANCOM(
   rand_formula = NULL
 )
 
-head(res)
+res$fig
 ```
 
 ## Getting help
