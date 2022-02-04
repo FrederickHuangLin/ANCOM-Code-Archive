@@ -5,3 +5,4 @@
 ^README\.Rmd$
 ^\.github$
 ^README_files$
+^CODE_OF_CONDUCT\.md$

@@ -63,3 +63,7 @@ res$fig
 ## Getting help
 
 If you encounter a clear bug, please file an issue with a minimal reproducible example on [GitHub](https://github.com/xec-cm/ANCOM/issues). 
+
+## Code of Conduct
+
+Please note that the ANCOM project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.

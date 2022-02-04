@@ -378,7 +378,10 @@ ANCOM <- function(feature_table,
       detected_0.9 = ifelse(W > 0.9 * (n_taxa - 1), TRUE, FALSE),
       detected_0.8 = ifelse(W > 0.8 * (n_taxa - 1), TRUE, FALSE),
       detected_0.7 = ifelse(W > 0.7 * (n_taxa - 1), TRUE, FALSE),
-      detected_0.6 = ifelse(W > 0.6 * (n_taxa - 1), TRUE, FALSE)
+      detected_0.6 = ifelse(W > 0.6 * (n_taxa - 1), TRUE, FALSE), 
+      mean_qval = apply(q_data, 2, mean), 
+      median_qval = apply(q_data, 2, stats::median), 
+      fisher_qval = apply(q_data, 2, function(x) survcomp::combine.test(x, method = "fisher"))
     )
   
   # Taxa with structural zeros are automatically declared to be differentially abundant
