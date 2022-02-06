@@ -1,0 +1,74 @@
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+name: R-CMD-check
+
+jobs:
+  R-CMD-check:
+    runs-on: ${{ matrix.config.os }}
+
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: macOS-latest, r: 'release'}
+          - {os: ubuntu-18.04, r: 'devel'}
+          - {os: ubuntu-18.04, r: 'release'}
+          - {os: ubuntu-18.04, r: 'oldrel-1'}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+
+    steps:
+      - name: Checkout breanch
+        uses: actions/checkout@v2
+
+      - name: System dependencies for mac-os
+        if: matrix.config.os == 'macOS-latest'
+        run: |
+          ## Enable installing XML from source if needed
+          brew install libxml2
+          echo "XML_CONFIG=/usr/local/opt/libxml2/bin/xml2-config" >> $GITHUB_ENV
+
+          ## Required to install magick as noted at
+          ## https://github.com/r-lib/usethis/commit/f1f1e0d10c1ebc75fd4c18fa7e2de4551fd9978f#diff-9bfee71065492f63457918efcd912cf2
+          brew install imagemagick@6
+
+          ## For textshaping, required by ragg, and required by pkgdown
+          brew install harfbuzz fribidi
+
+          ## Needed for ComplexHeatmap package on macOS
+          brew install xquartz libxt
+
+      - name: Install pandoc
+        uses: r-lib/actions/setup-pandoc@v2
+
+      - name: Setup tinytex
+        uses: r-lib/actions/setup-tinytex@v2
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+
+      - name: Install package dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          cache-version: 1
+          extra-packages: any::rcmdcheck
+
+      - name: Check package
+        uses: r-lib/actions/check-r-package@v2
+        with:
+          args: 'c("--no-manual", "--as-cran")'
+          
+          
+          
+          

@@ -1,0 +1,20 @@
+Package: ANCOM
+Title: Analysis of Microbiome Data in the Presence of Excess Zeros
+Version: 2.2
+Authors@R: 
+   person("Francesc", "Catala-Moll", , "fcatalamoll@gmail.com", role = c("aut", "cre"))
+Description: The current code implements ANCOM in cross-sectional and longitudinal datasets while allowing the use of covariates.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Imports: 
+    compositions,
+    dplyr,
+    ggplot2,
+    magrittr,
+    nlme,
+    survcomp,
+    tidyr
+Depends: 
+    R (>= 2.10)

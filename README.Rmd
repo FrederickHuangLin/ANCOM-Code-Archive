@@ -1,18 +1,19 @@
+---
+output: github_document
+---
 
 # User Manual for [ANCOM](https://www.tandfonline.com/doi/full/10.3402/mehd.v26.27663) v2.1
 
-[![R-CMD-check](https://github.com/xec-cm/ANCOM/workflows/R-CMD-check/badge.svg)](https://github.com/xec-cm/ANCOM/actions)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3577802.svg)](https://doi.org/10.5281/zenodo.3577802)
+ [![R-CMD-check](https://github.com/xec-cm/ANCOM/workflows/R-CMD-check/badge.svg)](https://github.com/xec-cm/ANCOM/actions)
+ [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3577802.svg)](https://doi.org/10.5281/zenodo.3577802)
 
-The current code implements ANCOM in cross-sectional and longitudinal
-datasets while allowing the use of covariates.
+The current code implements ANCOM in cross-sectional and longitudinal datasets while allowing the use of covariates.
 
 ## Installation
 
-To get a bug fix or to use a feature from the development version, you
-can install the development version of ANCOM from GitHub.
+To get a bug fix or to use a feature from the development version, you can install the development version of ANCOM from GitHub. 
 
-``` r
+```{r, eval=FALSE}
 if(!requireNamespace("devtools")){
   install.packages("devtools")
 }
@@ -22,7 +23,7 @@ devtools::install_github("xec-cm/ANCOM")
 
 ## Usage
 
-``` r
+```{r, fig.align='center'}
 library(ANCOM)
 
 # Step 0: Load or define input data
@@ -59,17 +60,10 @@ res <- ANCOM(
 res$fig
 ```
 
-<img src="README_files/figure-gfm/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
-
 ## Getting help
 
-If you encounter a clear bug, please file an issue with a minimal
-reproducible example on
-[GitHub](https://github.com/xec-cm/ANCOM/issues).
+If you encounter a clear bug, please file an issue with a minimal reproducible example on [GitHub](https://github.com/xec-cm/ANCOM/issues). 
 
 ## Code of Conduct
 
-Please note that the ANCOM project is released with a [Contributor Code
-of
-Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).
-By contributing to this project, you agree to abide by its terms.
+Please note that the ANCOM project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
