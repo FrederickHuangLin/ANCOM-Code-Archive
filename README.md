@@ -1,4 +1,4 @@
-# User Manual for [ANCOM](https://www.tandfonline.com/doi/full/10.3402/mehd.v26.27663) v2.1
+# User Manual for [ANCOM](https://www.tandfonline.com/doi/full/10.3402/mehd.v26.27663)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3577802.svg)](https://doi.org/10.5281/zenodo.3577802)
 
@@ -53,7 +53,7 @@ We adopted the methodology of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articl
 * ```p_adjust_method```: Character. Specifying the method to adjust p-values for multiple comparisons. Default is “BH” (Benjamini-Hochberg procedure).
 * ```alpha```: Level of significance. Default is 0.05.
 * ```adj_formula```: Character string representing the formula for adjustment (see example).
-* ```rand_formula```: Character string representing the formula for random effects in ```lme``` (see example).
+* ```rand_formula```: Character string representing the formula for random effects in ```lme```. For details, see `?lme`.
 * ```lme_control```: A list specifying control values for lme fit. For details, see `?lmeControl`.
 
 #### A flowchart of the tests within ANCOM
