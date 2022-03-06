@@ -7,9 +7,8 @@ The current code implements ANCOM in cross-sectional and longitudinal datasets w
 ```r
 library(nlme)
 library(tidyverse)
-library(ggplot2)
 library(compositions)
-source("scripts/ancom_v2.1.R")
+source("programs/ancom.R")
 ```
 
 ## Instructions for use
@@ -43,7 +42,7 @@ We adopted the methodology of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articl
 
 #### Usage
 
-* ```ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, alpha, adj_formula, rand_formula, ...)```
+* ```ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, alpha, adj_formula, rand_formula, lme_control)```
 
 #### Arguments
 
@@ -55,7 +54,7 @@ We adopted the methodology of [ANCOM-II](https://www.ncbi.nlm.nih.gov/pmc/articl
 * ```alpha```: Level of significance. Default is 0.05.
 * ```adj_formula```: Character string representing the formula for adjustment (see example).
 * ```rand_formula```: Character string representing the formula for random effects in ```lme``` (see example).
-* ```...```: Additional arguments.
+* ```lme_control```: A list specifying control values for lme fit. For details, see `?lmeControl`.
 
 #### A flowchart of the tests within ANCOM
 ![Flow Chart](/images/flowchart.png)
@@ -84,9 +83,10 @@ otu_data = data.frame(otu_data[, -1], check.names = FALSE)
 rownames(otu_data) = otu_id
 
 meta_data = read_tsv("data/moving-pics-sample-metadata.tsv")[-1, ]
-meta_data = meta_data %>% rename(Sample.ID = SampleID)
+meta_data = meta_data %>% 
+  rename(Sample.ID = SampleID)
 
-source("scripts/ancom_v2.1.R")
+source("programs/ancom.R")
 
 # Step 1: Data preprocessing
 
@@ -101,12 +101,10 @@ struc_zero = prepro$structure_zeros # Structural zero info
 # Step 2: ANCOM
 
 main_var = "Subject"; p_adj_method = "BH"; alpha = 0.05
-adj_formula = NULL; rand_formula = NULL
-t_start = Sys.time()
+adj_formula = NULL; rand_formula = NULL; lme_control = NULL
+
 res = ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, 
-            alpha, adj_formula, rand_formula)
-t_end = Sys.time()
-t_run = t_end - t_start # around 30s
+            alpha, adj_formula, rand_formula, lme_control)
 
 write_csv(res$out, "outputs/res_moving_pics.csv")
 
@@ -115,7 +113,7 @@ write_csv(res$out, "outputs/res_moving_pics.csv")
 # Number of taxa except structural zeros
 n_taxa = ifelse(is.null(struc_zero), nrow(feature_table), sum(apply(struc_zero, 1, sum) == 0))
 # Cutoff values for declaring differentially abundant taxa
-cut_off = c(0.9 * (n_taxa -1), 0.8 * (n_taxa -1), 0.7 * (n_taxa -1), 0.6 * (n_taxa -1))
+cut_off = c(0.9 * (n_taxa - 1), 0.8 * (n_taxa - 1), 0.7 * (n_taxa - 1), 0.6 * (n_taxa - 1))
 names(cut_off) = c("detected_0.9", "detected_0.8", "detected_0.7", "detected_0.6")
 
 # Annotation data
@@ -144,9 +142,10 @@ otu_data = data.frame(otu_data[, -1], check.names = FALSE)
 rownames(otu_data) = otu_id
 
 meta_data = read_tsv("data/moving-pics-sample-metadata.tsv")[-1, ]
-meta_data = meta_data %>% rename(Sample.ID = SampleID)
+meta_data = meta_data %>% 
+  rename(Sample.ID = SampleID)
 
-source("scripts/ancom_v2.1.R")
+source("programs/ancom.R")
 
 # Step 1: Data preprocessing
 
@@ -161,12 +160,10 @@ struc_zero = prepro$structure_zeros # Structural zero info
 # Step 2: ANCOM
 
 main_var = "Subject"; p_adj_method = "BH"; alpha = 0.05
-adj_formula = ”ReportedAntibioticUsage”; rand_formula = NULL
-t_start = Sys.time()
+adj_formula = "ReportedAntibioticUsage"; rand_formula = NULL; lme_control = NULL
+
 res = ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, 
-            alpha, adj_formula, rand_formula)
-t_end = Sys.time()
-t_run = t_end - t_start
+            alpha, adj_formula, rand_formula, lme_control)
 ```
 
 ### Repeated measure/longitudinal analysis
@@ -188,9 +185,11 @@ otu_data = data.frame(otu_data[, -1], check.names = FALSE)
 rownames(otu_data) = otu_id
 
 meta_data = read_tsv("data/ecam-sample-metadata.tsv")[-1, ]
-meta_data = meta_data %>% rename(Sample.ID = `#SampleID`)
+meta_data = meta_data %>% 
+  rename(Sample.ID = `#SampleID`) %>%
+  mutate(month = as.numeric(month))
 
-source("scripts/ancom_v2.1.R")
+source("programs/ancom.R")
 
 # Step 1: Data preprocessing
 
@@ -206,12 +205,10 @@ struc_zero = prepro$structure_zeros # Structural zero info
 
 main_var = "delivery"; p_adj_method = "BH"; alpha = 0.05
 adj_formula = NULL; rand_formula = "~ 1 | studyid"
-control = lmeControl(maxIter = 100, msMaxIter = 100, opt = "optim")
-t_start = Sys.time()
+lme_control = list(maxIter = 100, msMaxIter = 100, opt = "optim")
+
 res = ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, 
-            alpha, adj_formula, rand_formula, control = control)
-t_end = Sys.time()
-t_run = t_end - t_start # around 30s
+            alpha, adj_formula, rand_formula, lme_control)
 
 write_csv(res$out, "outputs/res_ecam.csv")
 
@@ -220,7 +217,7 @@ write_csv(res$out, "outputs/res_ecam.csv")
 # Number of taxa except structural zeros
 n_taxa = ifelse(is.null(struc_zero), nrow(feature_table), sum(apply(struc_zero, 1, sum) == 0))
 # Cutoff values for declaring differentially abundant taxa
-cut_off = c(0.9 * (n_taxa -1), 0.8 * (n_taxa -1), 0.7 * (n_taxa -1), 0.6 * (n_taxa -1))
+cut_off = c(0.9 * (n_taxa - 1), 0.8 * (n_taxa - 1), 0.7 * (n_taxa - 1), 0.6 * (n_taxa - 1))
 names(cut_off) = c("detected_0.9", "detected_0.8", "detected_0.7", "detected_0.6")
 
 # Annotation data
@@ -250,9 +247,11 @@ otu_data = data.frame(otu_data[, -1], check.names = FALSE)
 rownames(otu_data) = otu_id
 
 meta_data = read_tsv("data/ecam-sample-metadata.tsv")[-1, ]
-meta_data = meta_data %>% rename(Sample.ID = `#SampleID`)
+meta_data = meta_data %>% 
+  rename(Sample.ID = `#SampleID`) %>%
+  mutate(month = as.numeric(month))
 
-source("scripts/ancom_v2.1.R")
+source("programs/ancom.R")
 
 # Step 1: Data preprocessing
 
@@ -268,11 +267,10 @@ struc_zero = prepro$structure_zeros # Structural zero info
 
 main_var = "delivery"; p_adj_method = "BH"; alpha = 0.05
 adj_formula = "month"; rand_formula = "~ 1 | studyid"
-t_start = Sys.time()
+lme_control = list(maxIter = 100, msMaxIter = 100, opt = "optim")
+
 res = ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, 
-            alpha, adj_formula, rand_formula)
-t_end = Sys.time()
-t_run = t_end - t_start
+            alpha, adj_formula, rand_formula, lme_control)
 ```
 
 #### Random coefficients/slope model
@@ -292,9 +290,11 @@ otu_data = data.frame(otu_data[, -1], check.names = FALSE)
 rownames(otu_data) = otu_id
 
 meta_data = read_tsv("data/ecam-sample-metadata.tsv")[-1, ]
-meta_data = meta_data %>% rename(Sample.ID = `#SampleID`)
+meta_data = meta_data %>% 
+  rename(Sample.ID = `#SampleID`) %>%
+  mutate(month = as.numeric(month))
 
-source("scripts/ancom_v2.1.R")
+source("programs/ancom.R")
 
 # Step 1: Data preprocessing
 
@@ -310,13 +310,11 @@ struc_zero = prepro$structure_zeros # Structural zero info
 
 main_var = "delivery"; p_adj_method = "BH"; alpha = 0.05
 adj_formula = "month"; rand_formula = "~ month | studyid"
-t_start = Sys.time()
-res = ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, 
-            alpha, adj_formula, rand_formula)
-t_end = Sys.time()
-t_run = t_end - t_start
-```
+lme_control = list(maxIter = 100, msMaxIter = 100, opt = "optim")
 
+res = ANCOM(feature_table, meta_data, struc_zero, main_var, p_adj_method, 
+            alpha, adj_formula, rand_formula, lme_control)
+```
 
 
 

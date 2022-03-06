@@ -22,15 +22,20 @@ feature_table_pre_process = function(feature_table, meta_data, sample_var, group
   if (!is.null(group_var)) {
     group = meta_data[, group_var]
     z = feature_table + 1 # Add pseudo-count (1) 
-    f = log(z); f[f == 0] = NA; f = colMeans(f, na.rm = T)
+    f = log(z)
+    f[f == 0] = NA
+    f = colMeans(f, na.rm = T)
     f_fit = lm(f ~ group)
-    e = rep(0, length(f)); e[!is.na(group)] = residuals(f_fit)
+    e = rep(0, length(f))
+    e[!is.na(group)] = residuals(f_fit)
     y = t(t(z) - e)
     
     outlier_check = function(x){
       # Fitting the mixture model using the algorithm of Peddada, S. Das, and JT Gene Hwang (2002)
-      mu1 = quantile(x, 0.25, na.rm = T); mu2 = quantile(x, 0.75, na.rm = T)
-      sigma1 = quantile(x, 0.75, na.rm = T) - quantile(x, 0.25, na.rm = T); sigma2 = sigma1
+      mu1 = quantile(x, 0.25, na.rm = T)
+      mu2 = quantile(x, 0.75, na.rm = T)
+      sigma1 = quantile(x, 0.75, na.rm = T) - quantile(x, 0.25, na.rm = T)
+      sigma2 = sigma1
       pi = 0.75
       n = length(x)
       epsilon = 100
@@ -122,7 +127,7 @@ feature_table_pre_process = function(feature_table, meta_data, sample_var, group
 
 # ANCOM main function
 ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_method = "BH", 
-                 alpha = 0.05, adj_formula = NULL, rand_formula = NULL, ...){
+                 alpha = 0.05, adj_formula = NULL, rand_formula = NULL, lme_control = NULL){
   # OTU table transformation: 
   # (1) Discard taxa with structural zeros (if any); (2) Add pseudocount (1) and take logarithm.
   if (!is.null(struc_zero)) {
@@ -171,7 +176,9 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
   p_data = matrix(NA, nrow = n_taxa, ncol = n_taxa)
   colnames(p_data) = taxa_id
   rownames(p_data) = taxa_id
+  pb = txtProgressBar(0, n_taxa - 1, style = 3)
   for (i in 1:(n_taxa - 1)) {
+    setTxtProgressBar(pb, i)
     # Loop through each taxon.
     # For each taxon i, additive log ratio (alr) transform the OTU table using taxon i as the reference.
     # e.g. the first alr matrix will be the log abundance data (comp_table) recursively subtracted 
@@ -188,9 +195,9 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
     # P-values
     if (is.null(rand_formula) & is.null(adj_formula)) {
       p_data[-(1:i), i] = apply(alr_data[, 1:n_lr, drop = FALSE], 2, function(x){
-        suppressWarnings(tfun(tformula, 
-                              data = data.frame(x, alr_data, 
-                                                check.names = FALSE))$p.value)
+        test_data = data.frame(x, alr_data, check.names = FALSE)
+        suppressWarnings(p <- tfun(tformula, data = test_data)$p.value)
+        return(p)
         }
       ) 
     }else if (is.null(rand_formula) & !is.null(adj_formula)) {
@@ -198,20 +205,30 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
         fit = tfun(tformula, 
                    data = data.frame(x, alr_data, check.names = FALSE), 
                    na.action = na.omit)
-        summary(fit)[[1]][main_var, "Pr(>F)"]
+         p = summary(fit)[[1]][main_var, "Pr(>F)"]
+         return(p)
         }
       )
     }else if (!is.null(rand_formula)) {
       p_data[-(1:i), i] = apply(alr_data[, 1:n_lr, drop = FALSE], 2, function(x){
-        fit = tfun(fixed = tformula, 
-                   data = data.frame(x, alr_data, check.names = FALSE),
-                   random = formula(rand_formula),
-                   na.action = na.omit, ...)
-        anova(fit)[main_var, "p-value"]
+        fit = try(tfun(fixed = tformula, 
+                       data = data.frame(x, alr_data, check.names = FALSE),
+                       random = formula(rand_formula),
+                       na.action = na.omit,
+                       control = lme_control),
+                  silent = TRUE)
+        
+        if (inherits(fit, "try-error")) {
+          p = NA
+        } else {
+          p = anova(fit)[main_var, "p-value"]
+        }
+        return(p)
         }
       ) 
     }
   }
+  close(pb)
   # Complete the p-value matrix.
   # What we got from above iterations is a lower triangle matrix of p-values.
   p_data[upper.tri(p_data)] = t(p_data)[upper.tri(p_data)]
@@ -229,10 +246,11 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
   out_comp = data.frame(taxa_id, W, row.names = NULL, check.names = FALSE)
   # Declare a taxon to be differentially abundant based on the quantile of W statistic.
   # We perform (n_taxa - 1) hypothesis testings on each taxon, so the maximum number of rejections is (n_taxa - 1).
-  out_comp = out_comp%>%mutate(detected_0.9 = ifelse(W > 0.9 * (n_taxa -1), TRUE, FALSE),
-                               detected_0.8 = ifelse(W > 0.8 * (n_taxa -1), TRUE, FALSE),
-                               detected_0.7 = ifelse(W > 0.7 * (n_taxa -1), TRUE, FALSE),
-                               detected_0.6 = ifelse(W > 0.6 * (n_taxa -1), TRUE, FALSE))
+  out_comp = out_comp %>% 
+    mutate(detected_0.9 = ifelse(W > 0.9 * (n_taxa -1), TRUE, FALSE),
+           detected_0.8 = ifelse(W > 0.8 * (n_taxa -1), TRUE, FALSE),
+           detected_0.7 = ifelse(W > 0.7 * (n_taxa -1), TRUE, FALSE),
+           detected_0.6 = ifelse(W > 0.6 * (n_taxa -1), TRUE, FALSE))
   
   # Taxa with structural zeros are automatically declared to be differentially abundant
   if (!is.null(struc_zero)){
@@ -288,7 +306,7 @@ ANCOM = function(feature_table, meta_data, struc_zero = NULL, main_var, p_adj_me
     fig
   }
   
-  res = list(out = out, fig = fig)
+  res = list(p_data = p_data, q_data = q_data, out = out, fig = fig)
   return(res)
 }
 
