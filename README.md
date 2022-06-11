@@ -1,3 +1,7 @@
+# Note
+
+Please be aware that this repository is only for archive purposes. The standalone ANCOM functions in this repository are no longer maintained. User are highly recommended to use `ancom` or `ancombc` functions in our [ANCOMBC](https://www.bioconductor.org/packages/release/bioc/html/ANCOMBC.html) R package. For bug reports, please go to [ANCOMBC](https://github.com/FrederickHuangLin/ANCOMBC) repository. 
+
 # User Manual for [ANCOM](https://www.tandfonline.com/doi/full/10.3402/mehd.v26.27663)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3577802.svg)](https://doi.org/10.5281/zenodo.3577802)
